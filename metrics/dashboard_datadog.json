@@ -1,64 +1,1070 @@
 {
-  "title": "Gerald BNPL - Approvals & Limits (7d)",
+  "title": "Gerald BNPL Decision Service",
+  "description": "Comprehensive dashboard for the Gerald BNPL Decision Service including business metrics for Product/Finance and engineering metrics for SRE/On-call teams.",
   "layout_type": "ordered",
+  "reflow_type": "fixed",
+  "tags": [
+    "team:gerald",
+    "service:bnpl-decision"
+  ],
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": ["production", "staging", "development"],
+      "default": "production"
+    }
+  ],
   "widgets": [
     {
       "definition": {
-        "type": "timeseries",
-        "title": "Approval Rate (1h)",
-        "requests": [
+        "title": "BUSINESS VIEW - Product & Finance",
+        "type": "group",
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "sum:gerald.approved{*}.rollup(sum,3600)/(sum:gerald.approved{*}.rollup(sum,3600)+sum:gerald.declined{*}.rollup(sum,3600))"
-          }
-        ]
-      }
-    },
-    {
-      "definition": {
-        "type": "timeseries",
-        "title": "Decisions total (by outcome)",
-        "requests": [
-          {
-            "q": "sum:gerald.approved{*}.as_count()"
+            "definition": {
+              "type": "timeseries",
+              "title": "7-Day Approval Rate Trend with 24h Moving Average",
+              "title_size": "16",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "value"],
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Daily Approval Rate %",
+                      "formula": "(query1 / (query1 + query2)) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{outcome:approved,$env}.as_count().rollup(sum, 86400)"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{outcome:denied,$env}.as_count().rollup(sum, 86400)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "24h Moving Avg",
+                      "formula": "moving_rollup((query3 / (query3 + query4)) * 100, 86400, 'mean')"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{outcome:approved,$env}.as_count()"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{outcome:denied,$env}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "dashed",
+                    "line_width": "thick"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "min": "0",
+                "max": "100",
+                "label": "Approval %"
+              },
+              "markers": [
+                {
+                  "value": "y = 70",
+                  "display_type": "warning dashed",
+                  "label": "Target: 70%"
+                }
+              ]
+            }
           },
           {
-            "q": "sum:gerald.declined{*}.as_count()"
-          }
-        ]
-      }
-    },
-    {
-      "definition": {
-        "type": "toplist",
-        "title": "Credit Limit Buckets",
-        "requests": [
-          {
-            "q": "sum:gerald.credit_limit.bucket{*} by {bucket}"
-          }
-        ]
-      }
-    },
-    {
-      "definition": {
-        "type": "timeseries",
-        "title": "Webhook Latency (p50/p95)",
-        "requests": [
-          {
-            "q": "avg:webhook.latency.seconds{*}.rollup(avg,300)"
+            "definition": {
+              "type": "toplist",
+              "title": "Credit Limit Distribution by Bucket",
+              "title_size": "16",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{$env} by {score_band}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 1000,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 100,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
-            "q": "pct:95:webhook.latency.seconds{*}"
+            "definition": {
+              "type": "timeseries",
+              "title": "Credit Limit Distribution Over Time (Bar Chart)",
+              "title_size": "16",
+              "show_legend": true,
+              "legend_layout": "horizontal",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Maximum ($600)",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Premium ($500)",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Enhanced ($400)",
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Standard ($300)",
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Basic ($200)",
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "Entry ($100)",
+                      "formula": "query6"
+                    },
+                    {
+                      "alias": "Denied ($0)",
+                      "formula": "query7"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{score_band:maximum,$env}.as_count()"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{score_band:premium,$env}.as_count()"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{score_band:enhanced,$env}.as_count()"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{score_band:standard,$env}.as_count()"
+                    },
+                    {
+                      "name": "query5",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{score_band:basic,$env}.as_count()"
+                    },
+                    {
+                      "name": "query6",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{score_band:entry,$env}.as_count()"
+                    },
+                    {
+                      "name": "query7",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{score_band:denied,$env}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Average Credit Limit per Day ($)",
+              "title_size": "16",
+              "show_legend": true,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Avg Credit Limit ($)",
+                      "formula": "query1 / 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:bnpl_decision_amount_cents{$env}.rollup(avg, 86400)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "USD"
+              }
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Daily Decision Volume by Outcome",
+              "title_size": "16",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Approved",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Denied",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{outcome:approved,$env}.as_count().rollup(sum, 86400)"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{outcome:denied,$env}.as_count().rollup(sum, 86400)"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Total Decisions (7d)",
+              "title_size": "16",
+              "autoscale": true,
+              "precision": 0,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{$env}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Approval Rate (7d)",
+              "title_size": "16",
+              "autoscale": false,
+              "precision": 1,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / (query1 + query2)) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{outcome:approved,$env}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:bnpl_decisions_total{outcome:denied,$env}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 70,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 50,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 50,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "custom_unit": "%"
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Avg Credit Limit (7d)",
+              "title_size": "16",
+              "autoscale": false,
+              "precision": 0,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1 / 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "avg:bnpl_decision_amount_cents{$env}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "custom_unit": "$"
+            }
           }
         ]
       }
     },
     {
       "definition": {
-        "type": "timeseries",
-        "title": "Bank Fetch Failures",
-        "requests": [
+        "title": "ENGINEERING VIEW - SRE & On-call",
+        "type": "group",
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "widgets": [
           {
-            "q": "sum:bank.fetch.failures{*}.as_count()"
+            "definition": {
+              "type": "timeseries",
+              "title": "Decision Endpoint Latency Percentiles (p50, p95, p99)",
+              "title_size": "16",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "min", "max", "value"],
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p50",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "p50:bnpl_decision_duration_seconds{$env}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "p95",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "p95:bnpl_decision_duration_seconds{$env}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "formulas": [
+                    {
+                      "alias": "p99",
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "p99:bnpl_decision_duration_seconds{$env}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "label": "seconds"
+              },
+              "markers": [
+                {
+                  "value": "y = 1",
+                  "display_type": "warning dashed",
+                  "label": "SLO: 1s"
+                },
+                {
+                  "value": "y = 2",
+                  "display_type": "error dashed",
+                  "label": "Critical: 2s"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "HTTP Request Latency by Endpoint (p95)",
+              "title_size": "16",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p95 Latency",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "p95:http_request_duration_seconds{$env} by {endpoint}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "label": "seconds"
+              }
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Error Rate by Endpoint (%)",
+              "title_size": "16",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Error Rate %",
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:http_requests_total{status:5*,$env} by {endpoint}.as_count()"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:http_requests_total{$env} by {endpoint}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "min": "0"
+              },
+              "markers": [
+                {
+                  "value": "y = 1",
+                  "display_type": "warning dashed",
+                  "label": "Warning: 1%"
+                },
+                {
+                  "value": "y = 5",
+                  "display_type": "error dashed",
+                  "label": "Critical: 5%"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "HTTP Status Code Distribution",
+              "title_size": "16",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Requests",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:http_requests_total{$env} by {status}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Bank API Health (Upstream Dependency)",
+              "title_size": "16",
+              "show_legend": true,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Success",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Failed",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "query": "source:gerald-gateway @event:bank_api_request_completed @outcome:success",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "query": "source:gerald-gateway @event:bank_api_* @outcome:error",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Bank API Latency (from logs)",
+              "title_size": "16",
+              "show_legend": true,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "p50 (ms)",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "p95 (ms)",
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "p99 (ms)",
+                      "formula": "query3"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "query": "source:gerald-gateway @event:bank_api_request_completed",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "percentile",
+                        "metric": "@duration_ms",
+                        "percentile": 50
+                      },
+                      "group_by": []
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "query": "source:gerald-gateway @event:bank_api_request_completed",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "percentile",
+                        "metric": "@duration_ms",
+                        "percentile": 95
+                      },
+                      "group_by": []
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "logs",
+                      "query": "source:gerald-gateway @event:bank_api_request_completed",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "percentile",
+                        "metric": "@duration_ms",
+                        "percentile": 99
+                      },
+                      "group_by": []
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "cool"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "label": "ms"
+              }
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Ledger Webhook Delivery Status",
+              "title_size": "16",
+              "show_legend": true,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Delivered",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Failed",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "query": "source:gerald-gateway @event:webhook_send_completed",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "query": "source:gerald-gateway @event:webhook_send_failed",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Request Rate (per minute)",
+              "title_size": "16",
+              "show_legend": true,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Requests/min",
+                      "formula": "query1 * 60"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:http_requests_total{$env}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "blue",
+                    "line_type": "solid"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "query_table",
+              "title": "Service Health Summary by Endpoint",
+              "title_size": "16",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Total Requests",
+                      "formula": "query1",
+                      "cell_display_mode": "number",
+                      "limit": {
+                        "count": 10,
+                        "order": "desc"
+                      }
+                    },
+                    {
+                      "alias": "Errors",
+                      "formula": "query2",
+                      "cell_display_mode": "number"
+                    },
+                    {
+                      "alias": "Error Rate %",
+                      "formula": "(query2 / query1) * 100",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 5,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 1,
+                          "palette": "white_on_yellow"
+                        }
+                      ]
+                    },
+                    {
+                      "alias": "p95 Latency (s)",
+                      "formula": "query3",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 2,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 1,
+                          "palette": "white_on_yellow"
+                        }
+                      ]
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:http_requests_total{$env} by {endpoint}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:http_requests_total{status:5*,$env} by {endpoint}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "query": "p95:http_request_duration_seconds{$env} by {endpoint}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ]
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Overall Error Rate",
+              "title_size": "16",
+              "precision": 2,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "sum:http_requests_total{status:5*,$env}.as_count()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "query": "sum:http_requests_total{$env}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "value": 0.1,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 1,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 1,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "custom_unit": "%"
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "p95 Decision Latency",
+              "title_size": "16",
+              "precision": 3,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "query": "p95:bnpl_decision_duration_seconds{$env}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "value": 0.5,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 1,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 1,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "custom_unit": "s"
+            }
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Bank API Success Rate",
+              "title_size": "16",
+              "precision": 1,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "(query1 / (query1 + query2)) * 100"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "query": "source:gerald-gateway @event:bank_api_request_completed @outcome:success",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "query": "source:gerald-gateway @event:bank_api_* @outcome:error",
+                      "indexes": ["*"],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "value": 99,
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 95,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 95,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "custom_unit": "%"
+            }
           }
         ]
       }
