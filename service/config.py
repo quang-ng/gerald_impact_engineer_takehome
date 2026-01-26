@@ -24,9 +24,10 @@ class Settings(BaseSettings):
     # Transaction analysis window (days)
     analysis_window_days: int = 90
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+    }
 
 
 settings = Settings()

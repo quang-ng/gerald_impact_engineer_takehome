@@ -1,5 +1,4 @@
 """Pytest fixtures for the BNPL decision service tests."""
-import pytest
 import os
 import sys
 

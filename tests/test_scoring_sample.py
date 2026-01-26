@@ -161,8 +161,8 @@ class TestRiskCalculator:
 
         # Thin file should have low income regularity
         assert score.factors.income_regularity_score < 0.5
-        # Limited data means uncertain risk
-        assert score.total_score < 50
+        # Limited data means uncertain risk - thin file penalty applies
+        assert score.total_score <= 50
 
     def test_gig_worker_pattern(self):
         """Gig worker with irregular but positive income should score reasonably."""

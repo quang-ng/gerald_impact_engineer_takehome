@@ -20,8 +20,9 @@ This service implements risk scoring that balances:
 - Denying users likely to default (protecting both Gerald and the user)
 - Being inclusive of non-traditional income patterns (gig workers)
 """
-import structlog
+import time
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
@@ -31,27 +32,17 @@ from service.api import router
 from service.config import settings
 from service.database import engine, Base
 from service.services.bank_client import BankApiError
-
-# Configure structured logging
-structlog.configure(
-    processors=[
-        structlog.stdlib.filter_by_level,
-        structlog.stdlib.add_logger_name,
-        structlog.stdlib.add_log_level,
-        structlog.stdlib.PositionalArgumentsFormatter(),
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        structlog.processors.UnicodeDecoder(),
-        structlog.processors.JSONRenderer()
-    ],
-    wrapper_class=structlog.stdlib.BoundLogger,
-    context_class=dict,
-    logger_factory=structlog.stdlib.LoggerFactory(),
-    cache_logger_on_first_use=True,
+from service.logging import (
+    configure_logging,
+    get_logger,
+    set_request_context,
+    clear_request_context,
+    generate_request_id,
 )
 
-logger = structlog.get_logger()
+# Configure structured logging
+configure_logging()
+logger = get_logger(__name__)
 
 # Prometheus metrics
 REQUEST_COUNT = Counter(
@@ -82,16 +73,20 @@ DECISION_AMOUNT = Histogram(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan manager."""
-    logger.info("starting_service",
-               service_name=settings.service_name,
-               bank_api_base=settings.bank_api_base)
+    logger.info(
+        "service_starting",
+        service_name=settings.service_name,
+        bank_api_base=settings.bank_api_base,
+    )
 
     # Create tables if they don't exist (in production, use migrations)
     Base.metadata.create_all(bind=engine)
 
+    logger.info("service_started", service_name=settings.service_name)
+
     yield
 
-    logger.info("shutting_down_service")
+    logger.info("service_stopping", service_name=settings.service_name)
 
 
 app = FastAPI(
@@ -103,52 +98,109 @@ app = FastAPI(
 
 
 @app.middleware("http")
-async def metrics_middleware(request: Request, call_next):
-    """Middleware to track request metrics."""
-    import time
+async def request_logging_middleware(request: Request, call_next):
+    """
+    Middleware for request tracing, logging, and metrics.
 
+    Sets up request context with:
+    - request_id: Unique identifier for tracing
+    - Timing for duration_ms calculation
+    - Prometheus metrics collection
+    """
     method = request.method
     path = request.url.path
 
-    # Skip metrics endpoint itself
-    if path == "/metrics":
+    # Skip logging/metrics for health and metrics endpoints
+    if path in ("/health", "/metrics"):
         return await call_next(request)
 
-    start_time = time.time()
+    # Generate and set request ID
+    request_id = request.headers.get("X-Request-ID") or generate_request_id()
+    set_request_context(request_id)
 
-    response = await call_next(request)
+    # Store request_id in request state for access in route handlers
+    request.state.request_id = request_id
 
-    duration = time.time() - start_time
+    start_time = time.perf_counter()
 
-    REQUEST_COUNT.labels(
-        method=method,
-        endpoint=path,
-        status=response.status_code
-    ).inc()
+    # Log request received
+    logger.info("request_received", method=method, path=path)
 
-    REQUEST_LATENCY.labels(
-        method=method,
-        endpoint=path
-    ).observe(duration)
+    try:
+        response = await call_next(request)
 
-    return response
+        duration_ms = (time.perf_counter() - start_time) * 1000
+
+        # Log request completed
+        logger.info(
+            "request_completed",
+            method=method,
+            path=path,
+            status_code=response.status_code,
+            duration_ms=round(duration_ms, 2),
+        )
+
+        # Record Prometheus metrics
+        REQUEST_COUNT.labels(
+            method=method,
+            endpoint=path,
+            status=response.status_code
+        ).inc()
+
+        REQUEST_LATENCY.labels(
+            method=method,
+            endpoint=path
+        ).observe(duration_ms / 1000)  # Convert to seconds for histogram
+
+        # Add request_id to response headers for tracing
+        response.headers["X-Request-ID"] = request_id
+
+        return response
+
+    except Exception as e:
+        duration_ms = (time.perf_counter() - start_time) * 1000
+
+        logger.error(
+            "request_failed",
+            method=method,
+            path=path,
+            duration_ms=round(duration_ms, 2),
+            error=str(e),
+        )
+
+        REQUEST_COUNT.labels(
+            method=method,
+            endpoint=path,
+            status=500
+        ).inc()
+
+        raise
+
+    finally:
+        clear_request_context()
 
 
 @app.exception_handler(BankApiError)
 async def bank_api_error_handler(request: Request, exc: BankApiError):
     """Handle bank API errors."""
-    logger.error("bank_api_error",
-                status_code=exc.status_code,
-                detail=exc.detail)
+    request_id = getattr(request.state, "request_id", "unknown")
+
+    logger.error(
+        "bank_api_error",
+        status_code=exc.status_code,
+        detail=exc.detail,
+    )
 
     if exc.status_code == 404:
         return JSONResponse(
             status_code=404,
-            content={"detail": exc.detail}
+            content={"detail": exc.detail},
+            headers={"X-Request-ID": request_id},
         )
     return JSONResponse(
         status_code=502,
-        content={"detail": f"Bank API error: {exc.detail}"}
+        content={"detail": f"Bank API error: {exc.detail}"},
+        headers={"X-Request-ID": request_id},
     )
 
 

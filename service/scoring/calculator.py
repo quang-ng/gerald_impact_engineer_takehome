@@ -24,9 +24,10 @@ Key principles:
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Optional
-import structlog
 
-logger = structlog.get_logger()
+from service.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -175,7 +176,7 @@ class RiskCalculator:
             RiskScore with total score and component breakdown
         """
         if not transactions:
-            logger.warning("no_transactions_found", msg="Empty transaction list")
+            logger.warning("no_transactions_found")
             return RiskScore(
                 total_score=0,
                 factors=RiskFactors(
@@ -197,8 +198,7 @@ class RiskCalculator:
         txns = [t for t in txns if t.date >= cutoff_str]
 
         if not txns:
-            logger.warning("no_transactions_in_window",
-                         window_days=self.analysis_window_days)
+            logger.warning("no_transactions_in_window", window_days=self.analysis_window_days)
             return RiskScore(
                 total_score=0,
                 factors=RiskFactors(
@@ -228,17 +228,19 @@ class RiskCalculator:
         # Clamp to 0-100 range
         total_score = max(0, min(100, total_score))
 
-        logger.info("risk_score_calculated",
-                   total_score=total_score,
-                   balance_score=balance_score,
-                   income_score=income_score,
-                   nsf_score=nsf_score,
-                   regularity_score=regularity_score,
-                   thin_file_penalty=thin_file_penalty,
-                   transaction_count=factors.transaction_count,
-                   avg_daily_balance_cents=factors.avg_daily_balance_cents,
-                   income_ratio=factors.income_ratio,
-                   nsf_count=factors.nsf_count)
+        logger.info(
+            "risk_scored",
+            total_score=total_score,
+            balance_score=balance_score,
+            income_score=income_score,
+            nsf_score=nsf_score,
+            regularity_score=regularity_score,
+            thin_file_penalty=thin_file_penalty,
+            transaction_count=factors.transaction_count,
+            avg_daily_balance_cents=factors.avg_daily_balance_cents,
+            income_ratio=factors.income_ratio,
+            nsf_count=factors.nsf_count,
+        )
 
         return RiskScore(total_score=total_score, factors=factors)
 

@@ -1,11 +1,13 @@
 """Client for the Bank API to fetch transaction data."""
-import httpx
-import structlog
+import time
 from typing import Optional
 
-from service.config import settings
+import httpx
 
-logger = structlog.get_logger()
+from service.config import settings
+from service.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class BankApiError(Exception):
@@ -44,37 +46,60 @@ class BankClient:
         url = f"{self.base_url}/bank/transactions"
         params = {"user_id": user_id}
 
-        logger.info("fetching_transactions",
-                   user_id=user_id,
-                   url=url)
+        start_time = time.perf_counter()
+
+        logger.info("bank_api_request_started", user_id=user_id, url=url)
 
         async with httpx.AsyncClient(timeout=30.0) as client:
             try:
                 response = await client.get(url, params=params)
+                duration_ms = (time.perf_counter() - start_time) * 1000
 
                 if response.status_code == 404:
-                    logger.warning("user_not_found", user_id=user_id)
+                    logger.warning(
+                        "bank_api_user_not_found",
+                        user_id=user_id,
+                        duration_ms=round(duration_ms, 2),
+                        outcome="not_found",
+                    )
                     raise BankApiError(404, f"User {user_id} not found")
 
                 response.raise_for_status()
 
                 data = response.json()
                 transaction_count = len(data.get("transactions", []))
-                logger.info("transactions_fetched",
-                           user_id=user_id,
-                           transaction_count=transaction_count)
+
+                logger.info(
+                    "bank_api_request_completed",
+                    user_id=user_id,
+                    transaction_count=transaction_count,
+                    duration_ms=round(duration_ms, 2),
+                    outcome="success",
+                )
 
                 return data
 
             except httpx.HTTPStatusError as e:
-                logger.error("bank_api_error",
-                           user_id=user_id,
-                           status_code=e.response.status_code,
-                           error=str(e))
+                duration_ms = (time.perf_counter() - start_time) * 1000
+
+                logger.error(
+                    "bank_api_http_error",
+                    user_id=user_id,
+                    status_code=e.response.status_code,
+                    duration_ms=round(duration_ms, 2),
+                    error=str(e),
+                    outcome="error",
+                )
                 raise BankApiError(e.response.status_code, str(e))
 
             except httpx.RequestError as e:
-                logger.error("bank_api_request_error",
-                           user_id=user_id,
-                           error=str(e))
+                duration_ms = (time.perf_counter() - start_time) * 1000
+
+                logger.error(
+                    "bank_api_request_error",
+                    user_id=user_id,
+                    duration_ms=round(duration_ms, 2),
+                    error=str(e),
+                    outcome="error",
+                )
                 raise BankApiError(500, f"Request failed: {e}")

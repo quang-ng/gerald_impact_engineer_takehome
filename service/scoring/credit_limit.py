@@ -56,9 +56,9 @@ For $0-fee model, we err conservative because:
 - User experience of denial is better than default + collections
 - Trust is built by responsible lending, not by over-extending
 """
-import structlog
+from service.logging import get_logger
 
-logger = structlog.get_logger()
+logger = get_logger(__name__)
 
 # Credit limit buckets in cents
 CREDIT_LIMITS = {
@@ -107,11 +107,13 @@ def score_to_credit_limit(score: int) -> tuple[int, str]:
     for threshold, band in SCORE_THRESHOLDS:
         if score >= threshold:
             limit = CREDIT_LIMITS[band]
-            logger.debug("credit_limit_mapped",
-                        score=score,
-                        threshold=threshold,
-                        band=band,
-                        limit_cents=limit)
+            logger.debug(
+                "credit_limit_mapped",
+                score=score,
+                threshold=threshold,
+                band=band,
+                limit_cents=limit,
+            )
             return limit, band
 
     # Fallback (should never reach here)
