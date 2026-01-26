@@ -1,0 +1,67 @@
+{
+  "title": "Gerald BNPL - Approvals & Limits (7d)",
+  "layout_type": "ordered",
+  "widgets": [
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Approval Rate (1h)",
+        "requests": [
+          {
+            "q": "sum:gerald.approved{*}.rollup(sum,3600)/(sum:gerald.approved{*}.rollup(sum,3600)+sum:gerald.declined{*}.rollup(sum,3600))"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Decisions total (by outcome)",
+        "requests": [
+          {
+            "q": "sum:gerald.approved{*}.as_count()"
+          },
+          {
+            "q": "sum:gerald.declined{*}.as_count()"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "toplist",
+        "title": "Credit Limit Buckets",
+        "requests": [
+          {
+            "q": "sum:gerald.credit_limit.bucket{*} by {bucket}"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Webhook Latency (p50/p95)",
+        "requests": [
+          {
+            "q": "avg:webhook.latency.seconds{*}.rollup(avg,300)"
+          },
+          {
+            "q": "pct:95:webhook.latency.seconds{*}"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Bank Fetch Failures",
+        "requests": [
+          {
+            "q": "sum:bank.fetch.failures{*}.as_count()"
+          }
+        ]
+      }
+    }
+  ]
+}

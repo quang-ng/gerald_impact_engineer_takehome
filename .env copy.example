@@ -1,0 +1,4 @@
+DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/gerald
+BANK_API_BASE=http://localhost:8001
+LEDGER_WEBHOOK_URL=http://localhost:8002/mock-ledger
+SERVICE_NAME=gerald-gateway

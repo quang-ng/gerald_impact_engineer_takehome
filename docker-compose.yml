@@ -1,0 +1,56 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:15
+    container_name: gerald-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gerald
+    ports: ["5433:5432"]
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  bank:
+    build:
+      context: ./mock/bank_server
+      dockerfile: Dockerfile
+    container_name: mock-bank
+    ports: ["8001:8000"]
+    volumes:
+      - ./bank_stub:/data/bank_stub:ro
+
+  ledger:
+    build:
+      context: ./mock/ledger_server
+      dockerfile: Dockerfile
+    container_name: mock-ledger
+    ports: ["8002:8000"]
+
+  service:
+    build:
+      context: ./service
+      dockerfile: Dockerfile
+    container_name: gerald-service
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/gerald
+      BANK_API_BASE: http://bank:8000
+      LEDGER_WEBHOOK_URL: http://ledger:8000/mock-ledger
+      SERVICE_NAME: gerald-gateway
+    depends_on:
+      db:
+        condition: service_healthy
+      bank:
+        condition: service_started
+      ledger:
+        condition: service_started
+
+volumes:
+  postgres_data:
