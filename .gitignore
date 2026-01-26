@@ -2,6 +2,3 @@
 **/__pycache__/**
 gerald_bnpl_service.egg-info/**
 
-
-tests/*
-service/*
