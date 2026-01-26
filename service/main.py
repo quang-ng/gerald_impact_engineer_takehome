@@ -25,7 +25,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from starlette.responses import Response
 
 from service.api import router
@@ -39,35 +39,11 @@ from service.logging import (
     clear_request_context,
     generate_request_id,
 )
+from service import metrics as service_metrics
 
 # Configure structured logging
 configure_logging()
 logger = get_logger(__name__)
-
-# Prometheus metrics
-REQUEST_COUNT = Counter(
-    "http_requests_total",
-    "Total HTTP requests",
-    ["method", "endpoint", "status"]
-)
-
-REQUEST_LATENCY = Histogram(
-    "http_request_duration_seconds",
-    "HTTP request latency",
-    ["method", "endpoint"]
-)
-
-DECISION_COUNT = Counter(
-    "bnpl_decisions_total",
-    "Total BNPL decisions made",
-    ["approved", "score_band"]
-)
-
-DECISION_AMOUNT = Histogram(
-    "bnpl_decision_amount_cents",
-    "BNPL decision amounts requested",
-    buckets=[10000, 20000, 30000, 40000, 50000, 60000, 100000]
-)
 
 
 @asynccontextmanager
@@ -141,13 +117,13 @@ async def request_logging_middleware(request: Request, call_next):
         )
 
         # Record Prometheus metrics
-        REQUEST_COUNT.labels(
+        service_metrics.HTTP_REQUESTS.labels(
             method=method,
             endpoint=path,
             status=response.status_code
         ).inc()
 
-        REQUEST_LATENCY.labels(
+        service_metrics.HTTP_REQUEST_LATENCY.labels(
             method=method,
             endpoint=path
         ).observe(duration_ms / 1000)  # Convert to seconds for histogram
@@ -168,7 +144,7 @@ async def request_logging_middleware(request: Request, call_next):
             error=str(e),
         )
 
-        REQUEST_COUNT.labels(
+        service_metrics.HTTP_REQUESTS.labels(
             method=method,
             endpoint=path,
             status=500

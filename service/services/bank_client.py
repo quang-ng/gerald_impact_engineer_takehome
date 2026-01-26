@@ -6,6 +6,7 @@ import httpx
 
 from service.config import settings
 from service.logging import get_logger
+from service import metrics
 
 logger = get_logger(__name__)
 
@@ -56,18 +57,22 @@ class BankClient:
                 duration_ms = (time.perf_counter() - start_time) * 1000
 
                 if response.status_code == 404:
+                    duration_seconds = duration_ms / 1000
                     logger.warning(
                         "bank_api_user_not_found",
                         user_id=user_id,
                         duration_ms=round(duration_ms, 2),
                         outcome="not_found",
                     )
+                    # Record not found as a failure
+                    metrics.record_bank_fetch(success=False, latency_seconds=duration_seconds, error_type="not_found")
                     raise BankApiError(404, f"User {user_id} not found")
 
                 response.raise_for_status()
 
                 data = response.json()
                 transaction_count = len(data.get("transactions", []))
+                duration_seconds = duration_ms / 1000
 
                 logger.info(
                     "bank_api_request_completed",
@@ -77,10 +82,14 @@ class BankClient:
                     outcome="success",
                 )
 
+                # Record successful bank fetch metrics
+                metrics.record_bank_fetch(success=True, latency_seconds=duration_seconds)
+
                 return data
 
             except httpx.HTTPStatusError as e:
                 duration_ms = (time.perf_counter() - start_time) * 1000
+                duration_seconds = duration_ms / 1000
 
                 logger.error(
                     "bank_api_http_error",
@@ -90,10 +99,15 @@ class BankClient:
                     error=str(e),
                     outcome="error",
                 )
+
+                # Record failed bank fetch metrics
+                metrics.record_bank_fetch(success=False, latency_seconds=duration_seconds, error_type="http_error")
+
                 raise BankApiError(e.response.status_code, str(e))
 
             except httpx.RequestError as e:
                 duration_ms = (time.perf_counter() - start_time) * 1000
+                duration_seconds = duration_ms / 1000
 
                 logger.error(
                     "bank_api_request_error",
@@ -102,4 +116,9 @@ class BankClient:
                     error=str(e),
                     outcome="error",
                 )
+
+                # Record failed bank fetch metrics (connection/timeout error)
+                error_type = "timeout" if "timeout" in str(e).lower() else "connection_error"
+                metrics.record_bank_fetch(success=False, latency_seconds=duration_seconds, error_type=error_type)
+
                 raise BankApiError(500, f"Request failed: {e}")

@@ -2,7 +2,6 @@
 import time
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from prometheus_client import Counter, Histogram
 from sqlalchemy.orm import Session
 
 from service.database import get_db
@@ -15,29 +14,11 @@ from service.schemas import (
 from service.services.decision import DecisionService
 from service.services.webhook import WebhookService
 from service.services.bank_client import BankApiError
+from service import metrics
 
 logger = get_logger(__name__)
 
 router = APIRouter(prefix="/v1", tags=["decisions"])
-
-# Decision-specific metrics
-DECISION_COUNT = Counter(
-    "bnpl_decisions_total",
-    "Total BNPL decisions made",
-    ["outcome", "score_band"]
-)
-
-DECISION_LATENCY = Histogram(
-    "bnpl_decision_duration_seconds",
-    "Time to make BNPL decision",
-    buckets=[0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
-)
-
-DECISION_AMOUNT = Histogram(
-    "bnpl_decision_amount_cents",
-    "BNPL decision amounts requested",
-    buckets=[10000, 20000, 30000, 40000, 50000, 60000, 100000]
-)
 
 
 @router.post("/decision", response_model=DecisionResponse)
@@ -72,7 +53,7 @@ async def make_decision(
     )
 
     # Track requested amount
-    DECISION_AMOUNT.observe(request_body.amount_cents_requested)
+    metrics.record_requested_amount(request_body.amount_cents_requested)
 
     decision_service = DecisionService(db)
 
@@ -82,8 +63,8 @@ async def make_decision(
 
         response = await decision_service.make_decision(request_body)
 
-        duration_ms = (time.perf_counter() - start_time) * 1000
-        outcome = "approved" if response.approved else "denied"
+        duration_seconds = time.perf_counter() - start_time
+        duration_ms = duration_seconds * 1000
 
         # Log the decision with all required fields
         log_decision(
@@ -97,13 +78,14 @@ async def make_decision(
             duration_ms=duration_ms,
         )
 
-        # Record Prometheus metrics
-        DECISION_COUNT.labels(
-            outcome=outcome,
-            score_band=_get_score_band(response.decision_factors.risk_score)
-        ).inc()
-
-        DECISION_LATENCY.observe(duration_ms / 1000)
+        # Record all decision metrics
+        metrics.record_decision(
+            approved=response.approved,
+            credit_limit_cents=response.credit_limit_cents,
+            amount_granted_cents=response.amount_granted_cents,
+            score_band=_get_score_band(response.decision_factors.risk_score),
+            latency_seconds=duration_seconds,
+        )
 
         # Send webhook notification (fire and forget)
         try:
@@ -121,30 +103,35 @@ async def make_decision(
                 "plan_id": response.plan_id,
             })
 
-            webhook_duration_ms = (time.perf_counter() - webhook_start) * 1000
+            webhook_duration = time.perf_counter() - webhook_start
             logger.info(
                 "webhook_send_completed",
                 user_id=request_body.user_id,
-                duration_ms=round(webhook_duration_ms, 2),
+                duration_ms=round(webhook_duration * 1000, 2),
             )
 
+            # Record webhook metrics
+            metrics.record_webhook_delivery(success=True, latency_seconds=webhook_duration)
+
         except Exception as e:
+            webhook_duration = time.perf_counter() - webhook_start
             # Don't fail the request if webhook fails
             logger.error(
                 "webhook_send_failed",
                 user_id=request_body.user_id,
                 error=str(e),
             )
+            metrics.record_webhook_delivery(success=False, latency_seconds=webhook_duration)
 
         return response
 
     except BankApiError as e:
-        duration_ms = (time.perf_counter() - start_time) * 1000
+        duration_seconds = time.perf_counter() - start_time
 
         logger.error(
             "decision_failed",
             user_id=request_body.user_id,
-            duration_ms=round(duration_ms, 2),
+            duration_ms=round(duration_seconds * 1000, 2),
             error=str(e),
             outcome="error",
         )

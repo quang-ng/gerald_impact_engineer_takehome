@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from service.config import settings
 from service.models import OutboundWebhook
+from service import metrics
 
 logger = structlog.get_logger()
 
@@ -56,7 +57,19 @@ class WebhookService:
         self.db.add(webhook)
         self.db.commit()
 
+        # Update queue depth metric
+        self._update_queue_depth()
+
         return await self._deliver_webhook(webhook)
+
+    def _update_queue_depth(self) -> None:
+        """Update the webhook queue depth metric."""
+        pending_count = (
+            self.db.query(OutboundWebhook)
+            .filter(OutboundWebhook.status == "pending")
+            .count()
+        )
+        metrics.set_webhook_queue_depth(pending_count)
 
     async def _deliver_webhook(self, webhook: OutboundWebhook) -> bool:
         """
@@ -90,6 +103,8 @@ class WebhookService:
                     logger.info("webhook_delivered",
                                webhook_id=str(webhook.id),
                                status_code=response.status_code)
+                    # Update queue depth after successful delivery
+                    self._update_queue_depth()
                     return True
                 else:
                     webhook.status = "failed" if webhook.attempts >= self.MAX_ATTEMPTS else "pending"
@@ -98,6 +113,7 @@ class WebhookService:
                                   webhook_id=str(webhook.id),
                                   status_code=response.status_code,
                                   attempts=webhook.attempts)
+                    self._update_queue_depth()
                     return False
 
             except httpx.RequestError as e:
@@ -110,6 +126,7 @@ class WebhookService:
                             webhook_id=str(webhook.id),
                             error=str(e),
                             attempts=webhook.attempts)
+                self._update_queue_depth()
                 return False
 
     async def retry_pending_webhooks(self) -> int:
@@ -128,11 +145,16 @@ class WebhookService:
 
         delivered = 0
         for webhook in pending:
+            # Record retry attempt
+            metrics.WEBHOOK_RETRY.inc()
             if await self._deliver_webhook(webhook):
                 delivered += 1
 
         logger.info("pending_webhooks_retried",
                    total=len(pending),
                    delivered=delivered)
+
+        # Update queue depth after retries
+        self._update_queue_depth()
 
         return delivered
