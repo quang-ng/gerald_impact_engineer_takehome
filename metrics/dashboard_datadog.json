@@ -2,10 +2,8 @@
   "title": "Gerald BNPL Decision Service",
   "description": "Comprehensive dashboard for the Gerald BNPL Decision Service including business metrics for Product/Finance and engineering metrics for SRE/On-call teams.",
   "layout_type": "ordered",
-  "reflow_type": "fixed",
   "tags": [
-    "team:gerald",
-    "service:bnpl-decision"
+    "team:gerald"
   ],
   "template_variables": [
     {

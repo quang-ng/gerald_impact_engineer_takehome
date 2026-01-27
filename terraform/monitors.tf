@@ -24,8 +24,9 @@ terraform {
 }
 
 provider "datadog" {
-  api_key = var.datadog_api_key
-  app_key = var.datadog_app_key
+  api_key  = var.datadog_api_key
+  app_key  = var.datadog_app_key
+  api_url  = "https://api.us5.datadoghq.com"
 }
 
 # =============================================================================
@@ -82,7 +83,6 @@ resource "datadog_monitor" "approval_rate_drop" {
   # Notify on recovery
   notify_audit      = false
   include_tags      = true
-  new_group_delay   = 60
   renotify_interval = 30
 }
 
@@ -187,7 +187,6 @@ resource "datadog_monitor" "error_rate" {
   evaluation_delay    = 60
 
   include_tags      = true
-  new_group_delay   = 60
   renotify_interval = 15
 }
 
@@ -239,7 +238,6 @@ resource "datadog_monitor" "bank_api_failures" {
   evaluation_delay    = 60
 
   include_tags      = true
-  new_group_delay   = 60
   renotify_interval = 15
 }
 

@@ -2,3 +2,8 @@
 **/__pycache__/**
 gerald_bnpl_service.egg-info/**
 
+terraform/terraform.tfstate.backup
+terraform/terraform.tfstate
+terraform/.terraform/*
+terraform/.terraform/
+terraform/.terraform.lock.hcl

@@ -52,5 +52,23 @@ services:
       ledger:
         condition: service_started
 
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7
+    container_name: datadog-agent
+    environment:
+      DD_API_KEY: ${DD_API_KEY}
+      DD_SITE: us5.datadoghq.com
+      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
+      DD_PROMETHEUS_SCRAPE_ENABLED: "true"
+      DD_PROMETHEUS_SCRAPE_CHECKS: >-
+        [{"openmetrics_endpoint":"http://gerald-service:8000/metrics","namespace":"gerald","metrics":[".*"]}]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    depends_on:
+      service:
+        condition: service_started
+
 volumes:
   postgres_data:
