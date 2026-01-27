@@ -59,13 +59,11 @@ services:
       DD_API_KEY: ${DD_API_KEY}
       DD_SITE: us5.datadoghq.com
       DD_DOGSTATSD_NON_LOCAL_TRAFFIC: "true"
-      DD_PROMETHEUS_SCRAPE_ENABLED: "true"
-      DD_PROMETHEUS_SCRAPE_CHECKS: >-
-        [{"openmetrics_endpoint":"http://gerald-service:8000/metrics","namespace":"gerald","metrics":[".*"]}]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - ./datadog/conf.d/openmetrics.d/conf.yaml:/etc/datadog-agent/conf.d/openmetrics.d/conf.yaml:ro
     depends_on:
       service:
         condition: service_started
