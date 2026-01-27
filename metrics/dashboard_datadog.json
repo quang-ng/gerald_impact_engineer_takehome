@@ -1,10 +1,8 @@
 {
   "title": "Gerald BNPL Decision Service",
-  "description": "Comprehensive dashboard for the Gerald BNPL Decision Service including business metrics for Product/Finance and engineering metrics for SRE/On-call teams.",
+  "description": "Business metrics for Product/Finance and engineering metrics for SRE/On-call teams.",
   "layout_type": "ordered",
-  "tags": [
-    "team:gerald"
-  ],
+  "tags": ["team:gerald"],
   "widgets": [
     {
       "definition": {
@@ -17,62 +15,25 @@
             "definition": {
               "type": "timeseries",
               "title": "Approval Rate Trend",
-              "title_size": "16",
-              "show_legend": true,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Approval Rate %",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:gerald.gerald_approval_rate_1h{*}"
-                    }
-                  ],
+                  "formulas": [{"alias": "Approval Rate %", "formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "avg:gerald.gerald_approval_rate_1h{*}"}],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
                   "display_type": "line"
                 }
               ],
-              "yaxis": {
-                "min": "0",
-                "max": "100"
-              }
+              "yaxis": {"min": "0", "max": "100"}
             }
           },
           {
             "definition": {
               "type": "toplist",
               "title": "Decisions by Score Band",
-              "title_size": "16",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1",
-                      "limit": {
-                        "count": 10,
-                        "order": "desc"
-                      }
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.gerald_decision_by_score_band_total{*} by {score_band}.as_count()",
-                      "aggregator": "sum"
-                    }
-                  ],
+                  "formulas": [{"formula": "query1", "limit": {"count": 10, "order": "desc"}}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.gerald_decision_by_score_band.count{*} by {score_band}", "aggregator": "sum"}],
                   "response_format": "scalar"
                 }
               ]
@@ -82,27 +43,11 @@
             "definition": {
               "type": "timeseries",
               "title": "Decision Volume by Outcome",
-              "title_size": "16",
-              "show_legend": true,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Decisions",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.gerald_decision_total{*} by {outcome}.as_count()"
-                    }
-                  ],
+                  "formulas": [{"alias": "Decisions", "formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.gerald_decision.count{*} by {outcome}"}],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "semantic"
-                  },
                   "display_type": "bars"
                 }
               ]
@@ -112,62 +57,25 @@
             "definition": {
               "type": "timeseries",
               "title": "Average Credit Limit ($)",
-              "title_size": "16",
-              "show_legend": true,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Avg Credit Limit",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:gerald.gerald_avg_credit_limit_dollars{*}"
-                    }
-                  ],
+                  "formulas": [{"alias": "Avg Credit Limit", "formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "avg:gerald.gerald_avg_credit_limit_dollars{*}"}],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "purple",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
                   "display_type": "line"
                 }
-              ],
-              "yaxis": {
-                "include_zero": true
-              }
+              ]
             }
           },
           {
             "definition": {
               "type": "timeseries",
               "title": "Credit Limit Buckets Over Time",
-              "title_size": "16",
-              "show_legend": true,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Limits",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.gerald_credit_limit_bucket_total{*} by {bucket}.as_count()"
-                    }
-                  ],
+                  "formulas": [{"alias": "Limits", "formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.gerald_credit_limit_bucket.count{*} by {bucket}"}],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "semantic"
-                  },
                   "display_type": "bars"
                 }
               ]
@@ -177,24 +85,12 @@
             "definition": {
               "type": "query_value",
               "title": "Total Decisions",
-              "title_size": "16",
               "autoscale": true,
               "precision": 0,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.gerald_decision_total{*}.as_count()",
-                      "aggregator": "sum"
-                    }
-                  ],
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.gerald_decision.count{*}", "aggregator": "sum"}],
                   "response_format": "scalar"
                 }
               ]
@@ -204,41 +100,17 @@
             "definition": {
               "type": "query_value",
               "title": "Approval Rate",
-              "title_size": "16",
               "autoscale": false,
               "precision": 1,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:gerald.gerald_approval_rate_1h{*}",
-                      "aggregator": "last"
-                    }
-                  ],
+                  "formulas": [{"formula": "query1 * 100"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "avg:gerald.gerald_approval_rate_1h{*}", "aggregator": "last"}],
                   "response_format": "scalar",
                   "conditional_formats": [
-                    {
-                      "comparator": ">=",
-                      "value": 70,
-                      "palette": "white_on_green"
-                    },
-                    {
-                      "comparator": ">=",
-                      "value": 50,
-                      "palette": "white_on_yellow"
-                    },
-                    {
-                      "comparator": "<",
-                      "value": 50,
-                      "palette": "white_on_red"
-                    }
+                    {"comparator": ">=", "value": 50, "palette": "white_on_green"},
+                    {"comparator": ">=", "value": 30, "palette": "white_on_yellow"},
+                    {"comparator": "<", "value": 30, "palette": "white_on_red"}
                   ]
                 }
               ],
@@ -249,24 +121,12 @@
             "definition": {
               "type": "query_value",
               "title": "Avg Credit Limit",
-              "title_size": "16",
               "autoscale": false,
               "precision": 0,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:gerald.gerald_avg_credit_limit_dollars{*}",
-                      "aggregator": "last"
-                    }
-                  ],
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "avg:gerald.gerald_avg_credit_limit_dollars{*}", "aggregator": "last"}],
                   "response_format": "scalar"
                 }
               ],
@@ -286,47 +146,21 @@
           {
             "definition": {
               "type": "timeseries",
-              "title": "Decision Latency (seconds)",
-              "title_size": "16",
-              "show_legend": true,
+              "title": "Decision Latency (avg seconds)",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Avg Latency",
-                      "formula": "query1"
-                    }
-                  ],
+                  "formulas": [{"alias": "Avg Latency", "formula": "query1 / query2"}],
                   "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:gerald.decision_latency_seconds.sum{*}/avg:gerald.decision_latency_seconds.count{*}"
-                    }
+                    {"name": "query1", "data_source": "metrics", "query": "sum:gerald.decision_latency_seconds.sum{*}"},
+                    {"name": "query2", "data_source": "metrics", "query": "sum:gerald.decision_latency_seconds.count{*}"}
                   ],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "green",
-                    "line_type": "solid",
-                    "line_width": "normal"
-                  },
                   "display_type": "line"
                 }
               ],
-              "yaxis": {
-                "include_zero": true
-              },
               "markers": [
-                {
-                  "value": "y = 1",
-                  "display_type": "warning dashed",
-                  "label": "SLO: 1s"
-                },
-                {
-                  "value": "y = 2",
-                  "display_type": "error dashed",
-                  "label": "Critical: 2s"
-                }
+                {"value": "y = 1", "display_type": "warning dashed", "label": "SLO: 1s"},
+                {"value": "y = 2", "display_type": "error dashed", "label": "Critical: 2s"}
               ]
             }
           },
@@ -334,27 +168,11 @@
             "definition": {
               "type": "timeseries",
               "title": "HTTP Requests by Status Code",
-              "title_size": "16",
-              "show_legend": true,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Requests",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.http_requests_total{*} by {status}.as_count()"
-                    }
-                  ],
+                  "formulas": [{"alias": "Requests", "formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.http_requests.count{*} by {status}"}],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "semantic"
-                  },
                   "display_type": "bars"
                 }
               ]
@@ -363,29 +181,15 @@
           {
             "definition": {
               "type": "timeseries",
-              "title": "HTTP Request Duration (avg seconds)",
-              "title_size": "16",
-              "show_legend": true,
+              "title": "HTTP Request Duration (avg seconds by endpoint)",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Avg Duration",
-                      "formula": "query1"
-                    }
-                  ],
+                  "formulas": [{"alias": "Avg Duration", "formula": "query1 / query2"}],
                   "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:gerald.http_request_duration_seconds.sum{*} by {endpoint}/avg:gerald.http_request_duration_seconds.count{*} by {endpoint}"
-                    }
+                    {"name": "query1", "data_source": "metrics", "query": "sum:gerald.http_request_duration_seconds.sum{*} by {endpoint}"},
+                    {"name": "query2", "data_source": "metrics", "query": "sum:gerald.http_request_duration_seconds.count{*} by {endpoint}"}
                   ],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "dog_classic",
-                    "line_type": "solid"
-                  },
                   "display_type": "line"
                 }
               ]
@@ -394,28 +198,12 @@
           {
             "definition": {
               "type": "timeseries",
-              "title": "Bank API Health (Success vs Failure)",
-              "title_size": "16",
-              "show_legend": true,
+              "title": "Bank API Fetches",
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Success",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.gerald_bank_fetch_success_total{*}.as_count()"
-                    }
-                  ],
+                  "formulas": [{"alias": "Success", "formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.gerald_bank_fetch_success.count{*}"}],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "semantic"
-                  },
                   "display_type": "bars"
                 }
               ]
@@ -425,27 +213,14 @@
             "definition": {
               "type": "timeseries",
               "title": "Bank API Latency (avg seconds)",
-              "title_size": "16",
-              "show_legend": true,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Avg Latency",
-                      "formula": "query1"
-                    }
-                  ],
+                  "formulas": [{"alias": "Avg Latency", "formula": "query1 / query2"}],
                   "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:gerald.gerald_bank_fetch_latency_seconds.sum{*}/avg:gerald.gerald_bank_fetch_latency_seconds.count{*}"
-                    }
+                    {"name": "query1", "data_source": "metrics", "query": "sum:gerald.gerald_bank_fetch_latency_seconds.sum{*}"},
+                    {"name": "query2", "data_source": "metrics", "query": "sum:gerald.gerald_bank_fetch_latency_seconds.count{*}"}
                   ],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "cool"
-                  },
                   "display_type": "line"
                 }
               ]
@@ -455,27 +230,11 @@
             "definition": {
               "type": "timeseries",
               "title": "Webhook Delivery by Outcome",
-              "title_size": "16",
-              "show_legend": true,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Webhooks",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.gerald_webhook_delivery_total{*} by {outcome}.as_count()"
-                    }
-                  ],
+                  "formulas": [{"alias": "Webhooks", "formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.gerald_webhook_delivery.count{*} by {status}"}],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "semantic"
-                  },
                   "display_type": "bars"
                 }
               ]
@@ -485,65 +244,26 @@
             "definition": {
               "type": "timeseries",
               "title": "Webhook Queue Depth",
-              "title_size": "16",
-              "show_legend": true,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Queue Depth",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "avg:gerald.webhook_queue_depth{*}"
-                    }
-                  ],
+                  "formulas": [{"alias": "Queue Depth", "formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "avg:gerald.webhook_queue_depth{*}"}],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "warm"
-                  },
                   "display_type": "line"
                 }
               ],
-              "markers": [
-                {
-                  "value": "y = 100",
-                  "display_type": "error dashed",
-                  "label": "Alert: 100"
-                }
-              ]
+              "markers": [{"value": "y = 100", "display_type": "error dashed", "label": "Alert: 100"}]
             }
           },
           {
             "definition": {
               "type": "timeseries",
               "title": "Request Rate (per second)",
-              "title_size": "16",
-              "show_legend": true,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "alias": "Requests/s",
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.http_requests_total{*}.as_rate()"
-                    }
-                  ],
+                  "formulas": [{"alias": "Requests/s", "formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.http_requests.count{*}.as_rate()"}],
                   "response_format": "timeseries",
-                  "style": {
-                    "palette": "blue",
-                    "line_type": "solid"
-                  },
                   "display_type": "line"
                 }
               ]
@@ -552,74 +272,27 @@
           {
             "definition": {
               "type": "query_value",
-              "title": "Overall Error Rate",
-              "title_size": "16",
-              "precision": 2,
+              "title": "Total HTTP Requests",
+              "autoscale": true,
+              "precision": 0,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "(query1 / query2) * 100"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.http_requests_total{status:5*}.as_count()",
-                      "aggregator": "sum"
-                    },
-                    {
-                      "name": "query2",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.http_requests_total{*}.as_count()",
-                      "aggregator": "sum"
-                    }
-                  ],
-                  "response_format": "scalar",
-                  "conditional_formats": [
-                    {
-                      "comparator": "<=",
-                      "value": 0.1,
-                      "palette": "white_on_green"
-                    },
-                    {
-                      "comparator": "<=",
-                      "value": 1,
-                      "palette": "white_on_yellow"
-                    },
-                    {
-                      "comparator": ">",
-                      "value": 1,
-                      "palette": "white_on_red"
-                    }
-                  ]
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.http_requests.count{*}", "aggregator": "sum"}],
+                  "response_format": "scalar"
                 }
-              ],
-              "custom_unit": "%"
+              ]
             }
           },
           {
             "definition": {
               "type": "query_value",
-              "title": "Bank API Success Rate",
-              "title_size": "16",
-              "precision": 1,
+              "title": "Bank API Success Count",
+              "precision": 0,
               "requests": [
                 {
-                  "formulas": [
-                    {
-                      "formula": "query1"
-                    }
-                  ],
-                  "queries": [
-                    {
-                      "name": "query1",
-                      "data_source": "metrics",
-                      "query": "sum:gerald.gerald_bank_fetch_success_total{*}.as_count()",
-                      "aggregator": "sum"
-                    }
-                  ],
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:gerald.gerald_bank_fetch_success.count{*}", "aggregator": "sum"}],
                   "response_format": "scalar"
                 }
               ]
