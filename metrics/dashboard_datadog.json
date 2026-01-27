@@ -632,7 +632,7 @@
           {
             "definition": {
               "type": "timeseries",
-              "title": "Bank API Health (Upstream Dependency)",
+              "title": "Bank API Health (Success vs Failure)",
               "title_size": "16",
               "show_legend": true,
               "requests": [
@@ -650,23 +650,13 @@
                   "queries": [
                     {
                       "name": "query1",
-                      "data_source": "logs",
-                      "query": "source:gerald-gateway @event:bank_api_request_completed @outcome:success",
-                      "indexes": ["*"],
-                      "compute": {
-                        "aggregation": "count"
-                      },
-                      "group_by": []
+                      "data_source": "metrics",
+                      "query": "sum:gerald_bank_fetch_success_total{$env}.as_count()"
                     },
                     {
                       "name": "query2",
-                      "data_source": "logs",
-                      "query": "source:gerald-gateway @event:bank_api_* @outcome:error",
-                      "indexes": ["*"],
-                      "compute": {
-                        "aggregation": "count"
-                      },
-                      "group_by": []
+                      "data_source": "metrics",
+                      "query": "sum:bank_fetch_failures_total{$env}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -681,61 +671,40 @@
           {
             "definition": {
               "type": "timeseries",
-              "title": "Bank API Latency (from logs)",
+              "title": "Bank API Latency (p50, p95, p99)",
               "title_size": "16",
               "show_legend": true,
               "requests": [
                 {
                   "formulas": [
                     {
-                      "alias": "p50 (ms)",
+                      "alias": "p50",
                       "formula": "query1"
                     },
                     {
-                      "alias": "p95 (ms)",
+                      "alias": "p95",
                       "formula": "query2"
                     },
                     {
-                      "alias": "p99 (ms)",
+                      "alias": "p99",
                       "formula": "query3"
                     }
                   ],
                   "queries": [
                     {
                       "name": "query1",
-                      "data_source": "logs",
-                      "query": "source:gerald-gateway @event:bank_api_request_completed",
-                      "indexes": ["*"],
-                      "compute": {
-                        "aggregation": "percentile",
-                        "metric": "@duration_ms",
-                        "percentile": 50
-                      },
-                      "group_by": []
+                      "data_source": "metrics",
+                      "query": "p50:gerald_bank_fetch_latency_seconds{$env}"
                     },
                     {
                       "name": "query2",
-                      "data_source": "logs",
-                      "query": "source:gerald-gateway @event:bank_api_request_completed",
-                      "indexes": ["*"],
-                      "compute": {
-                        "aggregation": "percentile",
-                        "metric": "@duration_ms",
-                        "percentile": 95
-                      },
-                      "group_by": []
+                      "data_source": "metrics",
+                      "query": "p95:gerald_bank_fetch_latency_seconds{$env}"
                     },
                     {
                       "name": "query3",
-                      "data_source": "logs",
-                      "query": "source:gerald-gateway @event:bank_api_request_completed",
-                      "indexes": ["*"],
-                      "compute": {
-                        "aggregation": "percentile",
-                        "metric": "@duration_ms",
-                        "percentile": 99
-                      },
-                      "group_by": []
+                      "data_source": "metrics",
+                      "query": "p99:gerald_bank_fetch_latency_seconds{$env}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -746,14 +715,14 @@
                 }
               ],
               "yaxis": {
-                "label": "ms"
+                "label": "seconds"
               }
             }
           },
           {
             "definition": {
               "type": "timeseries",
-              "title": "Ledger Webhook Delivery Status",
+              "title": "Webhook Delivery (Success vs Failure)",
               "title_size": "16",
               "show_legend": true,
               "requests": [
@@ -771,23 +740,13 @@
                   "queries": [
                     {
                       "name": "query1",
-                      "data_source": "logs",
-                      "query": "source:gerald-gateway @event:webhook_send_completed",
-                      "indexes": ["*"],
-                      "compute": {
-                        "aggregation": "count"
-                      },
-                      "group_by": []
+                      "data_source": "metrics",
+                      "query": "sum:gerald_webhook_success_total{$env}.as_count()"
                     },
                     {
                       "name": "query2",
-                      "data_source": "logs",
-                      "query": "source:gerald-gateway @event:webhook_send_failed",
-                      "indexes": ["*"],
-                      "compute": {
-                        "aggregation": "count"
-                      },
-                      "group_by": []
+                      "data_source": "metrics",
+                      "query": "sum:gerald_webhook_failure_total{$env}.as_count()"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1022,23 +981,15 @@
                   "queries": [
                     {
                       "name": "query1",
-                      "data_source": "logs",
-                      "query": "source:gerald-gateway @event:bank_api_request_completed @outcome:success",
-                      "indexes": ["*"],
-                      "compute": {
-                        "aggregation": "count"
-                      },
-                      "group_by": []
+                      "data_source": "metrics",
+                      "query": "sum:gerald_bank_fetch_success_total{$env}.as_count()",
+                      "aggregator": "sum"
                     },
                     {
                       "name": "query2",
-                      "data_source": "logs",
-                      "query": "source:gerald-gateway @event:bank_api_* @outcome:error",
-                      "indexes": ["*"],
-                      "compute": {
-                        "aggregation": "count"
-                      },
-                      "group_by": []
+                      "data_source": "metrics",
+                      "query": "sum:bank_fetch_failures_total{$env}.as_count()",
+                      "aggregator": "sum"
                     }
                   ],
                   "response_format": "scalar",
