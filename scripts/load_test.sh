@@ -5,10 +5,10 @@
 #   delay:  seconds between rounds (default: 2)
 
 BASE_URL="${BASE_URL:-http://localhost:8000}"
-ROUNDS="${1:-20}"
-DELAY="${2:-2}"
+ROUNDS="${1:-200}"
+DELAY="${2:-1}"
 
-USERS=("user_good" "user_gig" "user_overdraft" "user_highutil" "user_thin")
+USERS=("user_good" "user_gig" "user_overdraft" "user_highutil" "user_thin" "user_stable" "user_newjob" "user_risky" "user_saver")
 AMOUNTS=(10000 20000 30000 40000 50000 60000)
 
 echo "Sending $ROUNDS rounds of requests to $BASE_URL (${#USERS[@]} users × random amounts)"

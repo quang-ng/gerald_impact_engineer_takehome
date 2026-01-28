@@ -1,7 +1,10 @@
 # Gerald BNPL Decision Service
 
 A Buy Now, Pay Later credit decision engine built for Gerald's $0-fee model. This service evaluates user creditworthiness based on bank transaction data, assigns credit limits, and creates repayment plans.
+---
 
+### Demo video: 
+https://drive.google.com/file/d/1DBC_sVaRiDdVpCU_r8a7Wi0TYuvK9n1I/view?usp=sharing
 ---
 
 ## 1. Architecture Overview
@@ -359,6 +362,12 @@ The Datadog dashboard is split into two views:
 - **Request Rate** — traffic volume for capacity planning.
 
 Both Product and Engineering share one dashboard. When approval rate drops, Product sees a business problem. Engineering can immediately check latency, Bank API failures, or error rates below. Shared visibility shortens incident response.
+
+**Dashboard Screenshots:**
+
+![Business View](screen_shoot/buisiness_view.png)
+
+![Engineering View](screen_shoot/engineering_view.png)
 
 ---
 

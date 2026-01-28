@@ -1,0 +1,25 @@
+{
+  "user_id": "user_stable",
+  "transactions": [
+    {"transaction_id": "a1000001-0001-4000-8000-000000000001", "date": "2025-11-01", "amount_cents": 350000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "TechCorp", "balance_cents": 450000, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000002", "date": "2025-11-03", "amount_cents": 15000, "type": "debit", "description": "SuperMart Purchase", "category": "groceries", "merchant": "SuperMart", "balance_cents": 435000, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000003", "date": "2025-11-05", "amount_cents": 12000, "type": "debit", "description": "Utility Bill", "category": "utilities", "merchant": "Electric Co", "balance_cents": 423000, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000004", "date": "2025-11-10", "amount_cents": 8500, "type": "debit", "description": "FoodiePlace", "category": "restaurants", "merchant": "FoodiePlace", "balance_cents": 414500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000005", "date": "2025-11-15", "amount_cents": 350000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "TechCorp", "balance_cents": 764500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000006", "date": "2025-11-18", "amount_cents": 20000, "type": "debit", "description": "Online Marketplace", "category": "shopping", "merchant": "Online Marketplace", "balance_cents": 744500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000007", "date": "2025-11-20", "amount_cents": 15000, "type": "debit", "description": "Utility Bill", "category": "utilities", "merchant": "Gas Co", "balance_cents": 729500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000008", "date": "2025-11-25", "amount_cents": 10000, "type": "debit", "description": "SuperMart Purchase", "category": "groceries", "merchant": "SuperMart", "balance_cents": 719500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000009", "date": "2025-12-01", "amount_cents": 350000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "TechCorp", "balance_cents": 1069500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000010", "date": "2025-12-05", "amount_cents": 18000, "type": "debit", "description": "Utility Bill", "category": "utilities", "merchant": "Electric Co", "balance_cents": 1051500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000011", "date": "2025-12-10", "amount_cents": 25000, "type": "debit", "description": "Online Marketplace", "category": "shopping", "merchant": "Online Marketplace", "balance_cents": 1026500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000012", "date": "2025-12-15", "amount_cents": 350000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "TechCorp", "balance_cents": 1376500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000013", "date": "2025-12-20", "amount_cents": 12000, "type": "debit", "description": "SuperMart Purchase", "category": "groceries", "merchant": "SuperMart", "balance_cents": 1364500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000014", "date": "2025-12-25", "amount_cents": 9000, "type": "debit", "description": "FoodiePlace", "category": "restaurants", "merchant": "FoodiePlace", "balance_cents": 1355500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000015", "date": "2026-01-01", "amount_cents": 350000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "TechCorp", "balance_cents": 1705500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000016", "date": "2026-01-05", "amount_cents": 14000, "type": "debit", "description": "Utility Bill", "category": "utilities", "merchant": "Electric Co", "balance_cents": 1691500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000017", "date": "2026-01-10", "amount_cents": 11000, "type": "debit", "description": "SuperMart Purchase", "category": "groceries", "merchant": "SuperMart", "balance_cents": 1680500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000018", "date": "2026-01-15", "amount_cents": 350000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "TechCorp", "balance_cents": 2030500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000019", "date": "2026-01-20", "amount_cents": 16000, "type": "debit", "description": "Online Marketplace", "category": "shopping", "merchant": "Online Marketplace", "balance_cents": 2014500, "nsf": false},
+    {"transaction_id": "a1000001-0001-4000-8000-000000000020", "date": "2026-01-25", "amount_cents": 8000, "type": "debit", "description": "FoodiePlace", "category": "restaurants", "merchant": "FoodiePlace", "balance_cents": 2006500, "nsf": false}
+  ]
+}

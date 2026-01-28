@@ -1,0 +1,17 @@
+{
+  "user_id": "user_saver",
+  "transactions": [
+    {"transaction_id": "d4000001-0001-4000-8000-000000000001", "date": "2025-11-01", "amount_cents": 400000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "BigCorp", "balance_cents": 800000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000002", "date": "2025-11-05", "amount_cents": 10000, "type": "debit", "description": "SuperMart Purchase", "category": "groceries", "merchant": "SuperMart", "balance_cents": 790000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000003", "date": "2025-11-10", "amount_cents": 8000, "type": "debit", "description": "Utility Bill", "category": "utilities", "merchant": "Electric Co", "balance_cents": 782000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000004", "date": "2025-11-15", "amount_cents": 400000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "BigCorp", "balance_cents": 1182000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000005", "date": "2025-11-20", "amount_cents": 12000, "type": "debit", "description": "SuperMart Purchase", "category": "groceries", "merchant": "SuperMart", "balance_cents": 1170000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000006", "date": "2025-12-01", "amount_cents": 400000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "BigCorp", "balance_cents": 1570000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000007", "date": "2025-12-10", "amount_cents": 9000, "type": "debit", "description": "FoodiePlace", "category": "restaurants", "merchant": "FoodiePlace", "balance_cents": 1561000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000008", "date": "2025-12-15", "amount_cents": 400000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "BigCorp", "balance_cents": 1961000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000009", "date": "2026-01-01", "amount_cents": 400000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "BigCorp", "balance_cents": 2361000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000010", "date": "2026-01-10", "amount_cents": 7000, "type": "debit", "description": "Utility Bill", "category": "utilities", "merchant": "Gas Co", "balance_cents": 2354000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000011", "date": "2026-01-15", "amount_cents": 400000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "BigCorp", "balance_cents": 2754000, "nsf": false},
+    {"transaction_id": "d4000001-0001-4000-8000-000000000012", "date": "2026-01-20", "amount_cents": 11000, "type": "debit", "description": "SuperMart Purchase", "category": "groceries", "merchant": "SuperMart", "balance_cents": 2743000, "nsf": false}
+  ]
+}

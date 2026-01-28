@@ -1,0 +1,23 @@
+{
+  "user_id": "user_risky",
+  "transactions": [
+    {"transaction_id": "c3000001-0001-4000-8000-000000000001", "date": "2025-11-01", "amount_cents": 150000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "Employer LLC", "balance_cents": 50000, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000002", "date": "2025-11-03", "amount_cents": 45000, "type": "debit", "description": "Online Marketplace", "category": "shopping", "merchant": "Online Marketplace", "balance_cents": 5000, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000003", "date": "2025-11-05", "amount_cents": 30000, "type": "debit", "description": "RideShare", "category": "transport", "merchant": "RideShare", "balance_cents": -25000, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000004", "date": "2025-11-05", "amount_cents": 3500, "type": "debit", "description": "Overdraft/NSF Fee", "category": "fees", "merchant": null, "balance_cents": -28500, "nsf": true},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000005", "date": "2025-11-10", "amount_cents": 20000, "type": "debit", "description": "FoodiePlace", "category": "restaurants", "merchant": "FoodiePlace", "balance_cents": -48500, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000006", "date": "2025-11-15", "amount_cents": 150000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "Employer LLC", "balance_cents": 101500, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000007", "date": "2025-11-18", "amount_cents": 60000, "type": "debit", "description": "Online Marketplace", "category": "shopping", "merchant": "Online Marketplace", "balance_cents": 41500, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000008", "date": "2025-11-22", "amount_cents": 50000, "type": "debit", "description": "Utility Bill", "category": "utilities", "merchant": "Electric Co", "balance_cents": -8500, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000009", "date": "2025-11-22", "amount_cents": 3500, "type": "debit", "description": "Overdraft/NSF Fee", "category": "fees", "merchant": null, "balance_cents": -12000, "nsf": true},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000010", "date": "2025-12-01", "amount_cents": 150000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "Employer LLC", "balance_cents": 138000, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000011", "date": "2025-12-05", "amount_cents": 80000, "type": "debit", "description": "Online Marketplace", "category": "shopping", "merchant": "Online Marketplace", "balance_cents": 58000, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000012", "date": "2025-12-10", "amount_cents": 70000, "type": "debit", "description": "RideShare", "category": "transport", "merchant": "RideShare", "balance_cents": -12000, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000013", "date": "2025-12-10", "amount_cents": 3500, "type": "debit", "description": "Overdraft/NSF Fee", "category": "fees", "merchant": null, "balance_cents": -15500, "nsf": true},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000014", "date": "2025-12-15", "amount_cents": 150000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "Employer LLC", "balance_cents": 134500, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000015", "date": "2026-01-01", "amount_cents": 150000, "type": "credit", "description": "Direct Deposit - Payroll", "category": "income", "merchant": "Employer LLC", "balance_cents": 100000, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000016", "date": "2026-01-05", "amount_cents": 90000, "type": "debit", "description": "Online Marketplace", "category": "shopping", "merchant": "Online Marketplace", "balance_cents": 10000, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000017", "date": "2026-01-10", "amount_cents": 30000, "type": "debit", "description": "Utility Bill", "category": "utilities", "merchant": "Electric Co", "balance_cents": -20000, "nsf": false},
+    {"transaction_id": "c3000001-0001-4000-8000-000000000018", "date": "2026-01-10", "amount_cents": 3500, "type": "debit", "description": "Overdraft/NSF Fee", "category": "fees", "merchant": null, "balance_cents": -23500, "nsf": true}
+  ]
+}

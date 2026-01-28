@@ -13,5 +13,17 @@
   },
   "user_highutil": {
     "user_id": "user_highutil"
+  },
+  "user_stable": {
+    "user_id": "user_stable"
+  },
+  "user_newjob": {
+    "user_id": "user_newjob"
+  },
+  "user_risky": {
+    "user_id": "user_risky"
+  },
+  "user_saver": {
+    "user_id": "user_saver"
   }
 }
